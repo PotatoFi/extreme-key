@@ -1,32 +1,44 @@
 <!doctype html>
 <html lang="en">
     <head>
+        <link
+            rel="stylesheet"
+            href="https://cdn.simplecss.org/simple.min.css"
+        />
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Key Retreiver</title>
         <style>
             body {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                font-family: Arial, sans-serif;
             }
             #apiKeyContainer {
                 display: none;
-                text-align: center;
+                flex-direction: column;
+                justify-content: center;
             }
             #apiKeyField {
                 width: 300px;
-                margin-right: 10px;
-                margin-bottom: 10px;
-            }
-            #copyMessage {
-                display: none;
-                color: green;
-                margin-top: 10px;
+                margin-top: 5px;
+                margin-bottom: 5px;
             }
             button {
-                margin-top: 10px;
+                margin-top: 5px;
+                margin-bottom: 5px;
+            }
+            input {
+                margin-top: 5px;
+                margin-bottom: 5px;
+                width: 300px;
+            }
+            label {
+                margin-top: 5px;
+                margin-bottom: 5px;
+            }
+            #result {
+                margin-top: 5px;
+                margin-bottom: 5px;
                 align-items: center;
             }
         </style>
@@ -46,7 +58,7 @@
             <input type="text" id="apiKeyField" wrap="soft" readonly />
             <br />
             <button id="copyButton">Copy to clipboard</button>
-            <div id="copyMessage">Copied to clipboard!</div>
+            <br />
             <button id="backButton">Go Back</button>
         </div>
         <div id="result"></div>
@@ -108,7 +120,7 @@
                                     Authorization: `Bearer ${bearerToken}`,
                                 },
                                 body: JSON.stringify({
-                                    description: "My token",
+                                    description: "Hamina",
                                     expire_time: null,
                                     permissions: [
                                         "logout",
@@ -216,11 +228,19 @@
                             document.getElementById(
                                 "loginContainer",
                             ).style.display = "none";
+
+                            // Show the API key and associated buttons
                             document.getElementById(
                                 "apiKeyContainer",
+                            ).style.display = "flex";
+                            //).style.display = "block";
+
+                            // Show the back button
+                            document.getElementById(
+                                "backButton",
                             ).style.display = "block";
 
-                            // Set API key in the text field
+                            // Put the API key in the text field
                             const apiKeyField =
                                 document.getElementById("apiKeyField");
                             apiKeyField.value = apiTokenData.access_token;
@@ -231,7 +251,7 @@
                             );
                         } else {
                             throw new Error(
-                                "API Token not found in the response",
+                                "API Token not found in the response.",
                             );
                         }
 
@@ -250,29 +270,27 @@
                     apiKeyField.select();
                     document.execCommand("copy");
 
-                    // Show "Copied to clipboard" message
-                    const copyMessage = document.getElementById("copyMessage");
-                    copyMessage.style.display = "block";
-
-                    // Show "Back" button
-                    document.getElementById("backButton").style.display =
-                        "block";
+                    // Change the button to say "Copied!"
+                    copyButton.innerHTML = "API key copied! ✅";
                 });
 
             // Back to login functionality
             document
                 .getElementById("backButton")
                 .addEventListener("click", function () {
-                    // Hide API key container and show login container
+                    // Hide API key container
                     document.getElementById("apiKeyContainer").style.display =
                         "none";
+
+                    // Show the login container
                     document.getElementById("loginContainer").style.display =
                         "block";
 
+                    // Reset the copy button
+                    copyButton.innerHTML = "Copy to clipboard (again)";
+
                     // Clear the API key field and hide messages
                     document.getElementById("apiKeyField").value = "";
-                    document.getElementById("copyMessage").style.display =
-                        "none";
                     document.getElementById("backButton").style.display =
                         "none";
                     document.getElementById("result").textContent = "";
