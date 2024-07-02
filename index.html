@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Key Retreiver</title>
+        <style>
+            body {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                font-family: Arial, sans-serif;
+            }
+            #apiKeyContainer {
+                display: none;
+                text-align: center;
+            }
+            #apiKeyField {
+                width: 300px;
+                margin-right: 10px;
+                margin-bottom: 10px;
+            }
+            #copyMessage {
+                display: none;
+                color: green;
+                margin-top: 10px;
+            }
+            button {
+                margin-top: 10px;
+                align-items: center;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>ExtremeCloud IQ Key Retreiver</h1>
+        <div id="loginContainer">
+            <form id="loginForm">
+                <label for="username">Username:</label>
+                <input type="text" id="username" required /><br /><br />
+                <label for="password">Password:</label>
+                <input type="password" id="password" required /><br /><br />
+                <button type="submit">Retreive API Key</button>
+            </form>
+        </div>
+        <div id="apiKeyContainer">
+            <input type="text" id="apiKeyField" wrap="soft" readonly />
+            <br />
+            <button id="copyButton">Copy to clipboard</button>
+            <div id="copyMessage">Copied to clipboard!</div>
+            <button id="backButton">Go Back</button>
+        </div>
+        <div id="result"></div>
+
+        <script>
+            document
+                .getElementById("loginForm")
+                .addEventListener("submit", async function (e) {
+                    e.preventDefault();
+                    const username = document.getElementById("username").value;
+                    const password = document.getElementById("password").value;
+                    const resultDiv = document.getElementById("result");
+
+                    console.log("Form submitted. Starting API calls...");
+
+                    try {
+                        console.log(
+                            "Attempting first API call to get bearer token...",
+                        );
+                        const loginResponse = await fetch(
+                            "https://api.extremecloudiq.com/login",
+                            {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    Accept: "application/json",
+                                },
+                                body: JSON.stringify({ username, password }),
+                            },
+                        );
+
+                        console.log(
+                            "First API call response status:",
+                            loginResponse.status,
+                        );
+
+                        if (!loginResponse.ok) {
+                            throw new Error(
+                                `Login failed with status: ${loginResponse.status}`,
+                            );
+                        }
+
+                        const loginData = await loginResponse.json();
+                        console.log("Login response data:", loginData);
+
+                        const bearerToken = loginData.access_token;
+                        console.log("Bearer token obtained:", bearerToken);
+
+                        console.log(
+                            "Attempting second API call to get API key...",
+                        );
+                        const apiTokenResponse = await fetch(
+                            "https://api.extremecloudiq.com/auth/apitoken",
+                            {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    Accept: "application/json",
+                                    Authorization: `Bearer ${bearerToken}`,
+                                },
+                                body: JSON.stringify({
+                                    description: "My token",
+                                    expire_time: null,
+                                    permissions: [
+                                        "logout",
+                                        "auth",
+                                        "auth:r",
+                                        "token:new",
+                                        "perm:check",
+                                        "account",
+                                        "account:r",
+                                        "viq:backup",
+                                        "user",
+                                        "user:r",
+                                        "hiq",
+                                        "hiq:r",
+                                        "org",
+                                        "org:new",
+                                        "org:del",
+                                        "org:rename",
+                                        "hiq.ctx",
+                                        "hiq.ctx:r",
+                                        "hiq.ctx:w",
+                                        "device",
+                                        "device:r",
+                                        "device:list",
+                                        "device:view",
+                                        "device:new",
+                                        "device:del",
+                                        "device:cli",
+                                        "device:deploy",
+                                        "device:manage",
+                                        "device:unmanage",
+                                        "device:reboot",
+                                        "client",
+                                        "client:r",
+                                        "locations",
+                                        "locations:r",
+                                        "network-policy",
+                                        "policy:ssid",
+                                        "network-policy:r",
+                                        "ssid",
+                                        "ssid:r",
+                                        "pcg:key",
+                                        "pcg:key:r",
+                                        "subscriptions-webhook",
+                                        "subscriptions-webhook:r",
+                                        "ccg",
+                                        "ccg:r",
+                                        "log",
+                                        "log:r",
+                                        "cwp",
+                                        "cwp:r",
+                                        "sms-tmpl",
+                                        "sms-tmpl:r",
+                                        "class-rule",
+                                        "class-rule:r",
+                                        "user-profile",
+                                        "user-profile:r",
+                                        "radius-proxy",
+                                        "radius-proxy:r",
+                                        "radius-server",
+                                        "radius-server:r",
+                                        "usergroup",
+                                        "usergroup:r",
+                                        "deployment",
+                                        "deployment:r",
+                                        "ad-server",
+                                        "ad-server:r",
+                                        "app",
+                                        "application:r",
+                                        "l3-address-profile",
+                                        "l3-address-profile:r",
+                                        "vlan-profile",
+                                        "vlan-profile:r",
+                                        "enduser",
+                                        "enduser:r",
+                                        "radius-client-object",
+                                        "radius-client-object:r",
+                                        "ldap-server",
+                                        "ldap-server:r",
+                                        "email-template",
+                                        "email-template:r",
+                                        "certificate",
+                                        "certificate:r",
+                                    ],
+                                }),
+                            },
+                        );
+
+                        console.log(
+                            "Second API call response status:",
+                            apiTokenResponse.status,
+                        );
+
+                        if (!apiTokenResponse.ok) {
+                            throw new Error(
+                                `Failed to get API token with status: ${apiTokenResponse.status}`,
+                            );
+                        }
+
+                        const apiTokenData = await apiTokenResponse.json();
+                        console.log("API token response data:", apiTokenData);
+
+                        if (apiTokenData.access_token) {
+                            // Hide login form and show API key field
+                            document.getElementById(
+                                "loginContainer",
+                            ).style.display = "none";
+                            document.getElementById(
+                                "apiKeyContainer",
+                            ).style.display = "block";
+
+                            // Set API key in the text field
+                            const apiKeyField =
+                                document.getElementById("apiKeyField");
+                            apiKeyField.value = apiTokenData.access_token;
+
+                            console.log(
+                                "API Token successfully retrieved:",
+                                apiTokenData.access_token,
+                            );
+                        } else {
+                            throw new Error(
+                                "API Token not found in the response",
+                            );
+                        }
+
+                        console.log("Process completed successfully.");
+                    } catch (error) {
+                        console.error("An error occurred:", error);
+                        resultDiv.textContent = `Error: ${error.message}`;
+                    }
+                });
+
+            // Copy to clipboard functionality
+            document
+                .getElementById("copyButton")
+                .addEventListener("click", function () {
+                    const apiKeyField = document.getElementById("apiKeyField");
+                    apiKeyField.select();
+                    document.execCommand("copy");
+
+                    // Show "Copied to clipboard" message
+                    const copyMessage = document.getElementById("copyMessage");
+                    copyMessage.style.display = "block";
+
+                    // Show "Back" button
+                    document.getElementById("backButton").style.display =
+                        "block";
+                });
+
+            // Back to login functionality
+            document
+                .getElementById("backButton")
+                .addEventListener("click", function () {
+                    // Hide API key container and show login container
+                    document.getElementById("apiKeyContainer").style.display =
+                        "none";
+                    document.getElementById("loginContainer").style.display =
+                        "block";
+
+                    // Clear the API key field and hide messages
+                    document.getElementById("apiKeyField").value = "";
+                    document.getElementById("copyMessage").style.display =
+                        "none";
+                    document.getElementById("backButton").style.display =
+                        "none";
+                    document.getElementById("result").textContent = "";
+                });
+        </script>
+    </body>
+</html>
